@@ -1,5 +1,6 @@
 package com.example.myclashroyaleserver.engine;
 
+import org.springframework.stereotype.Component;
 import com.example.myclashroyaleserver.constant.EntityState;
 import com.example.myclashroyaleserver.constant.Team;
 import com.example.myclashroyaleserver.factory.UnitFactory;
@@ -12,6 +13,7 @@ import com.example.myclashroyaleserver.model.Card;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class BattleField {
     //实体集合：敌我双方所有的士兵，建筑
     private final List<GameEntity> entities = new ArrayList<>();

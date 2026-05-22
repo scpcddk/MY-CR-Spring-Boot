@@ -1,8 +1,10 @@
 package com.example.myclashroyaleserver.engine;
 
+import org.springframework.stereotype.Component;
 import com.example.myclashroyaleserver.model.GameEntity;
 import java.util.List;
 
+@Component
 public class GameLoop {
     private final BattleField battleField;
     private boolean running = false;
