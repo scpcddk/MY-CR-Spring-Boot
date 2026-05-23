@@ -79,6 +79,10 @@ my-clash-royale-server/
     │   │   │
     │   │   ├── util/                         # 🛠️ 算法工具
     │   │   │   └── MathUtil.java             #   欧几里得距离计算、AoE 范围判定等
+    |   |   |
+    |   |   ├── controller/                   #   接收浏览器、Postman 或其他客户端发来的 HTTP 请求,调用后端的业务逻辑,把结果包装成 JSON 返回给客户端
+    |   |   |   └──BattleController           #   处理与"战斗状态"相关的 HTTP 请求
+    |   |   |
     │   │   │
     │   │   └── config/                       # ⚙️ 应用配置与启动管理
     │   │       └── GameStarter.java          #   CommandLineRunner，容器就绪后自动点火 30Hz 循环

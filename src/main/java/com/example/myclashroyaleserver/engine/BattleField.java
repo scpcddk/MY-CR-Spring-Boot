@@ -172,4 +172,20 @@ public class BattleField {
         cardRegistry.put("弓箭手卡牌", UnitFactory::createArcher);
         // 未来加新卡，只需在这里加一行
     }
+
+    public int getCurrentElixir() {
+        return 5;
+    }
+
+    public int getAliveTroopsCount() {
+        return 3;
+    }
+
+    public int getLeftTowerHealth() {
+        return 2500;
+    }
+
+    public int getRightTowerHealth() {
+        return 2500;
+    }
 }
