@@ -139,7 +139,7 @@ public class BattleField {
      * @param y    部署Y坐标
      * @return 是否部署成功
      */
-    public boolean deployCard(Team team,Card card,double x,double y) {
+    public synchronized boolean deployCard(Team team,Card card,double x,double y) {
         ElixirManager em = getElixirManager(team);
 
         // 1. 查注册表
@@ -187,5 +187,18 @@ public class BattleField {
 
     public int getRightTowerHealth() {
         return 2500;
+    }
+
+    // 临时方法：供 POST /api/battle/deploy 使用，简化版部署
+    public synchronized boolean deployUnit(String cardType, double x, double y) {
+        System.out.println("[D32临时] 部署卡牌: " + cardType + " at (" + x + ", " + y + ")");
+        // 这里可以后续替换为调用真正的 deployCard 逻辑
+        return true;
+    }
+
+    // 临时方法：扣除圣水（简化版）
+    public synchronized void deductElixir(int cost) {
+        System.out.println("[D32临时] 扣除圣水: " + cost);
+        // 真实扣费需要根据阵营来，暂时只打印日志
     }
 }
