@@ -11,13 +11,15 @@ import com.example.myclashroyaleserver.util.MathUtil;
 import com.example.myclashroyaleserver.model.Card;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class BattleField {
     //实体集合：敌我双方所有的士兵，建筑
     private final List<GameEntity> entities = new ArrayList<>();
-    private final java.util.Map<String,UnitCreator> cardRegistry = new java.util.HashMap<>();
+    private final Map<String,UnitCreator> cardRegistry = new HashMap<>();
 
     // 💧 蓝方和红方的圣水管理器
     private final ElixirManager blueElixir = new ElixirManager();
