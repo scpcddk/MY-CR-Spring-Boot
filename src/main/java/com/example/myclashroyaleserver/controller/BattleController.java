@@ -1,23 +1,19 @@
 package com.example.myclashroyaleserver.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.example.myclashroyaleserver.engine.BattleField;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 @RestController
-@RequestMapping("/api/battle")
+@RequestMapping("/api/battles")
 public class BattleController {
     @Autowired
     private BattleField battleField;
 
     @GetMapping("/{battleId}")
-    public BattleStatusResponse getBattleStatus() {
+    public BattleStatusResponse getBattleStatus(@PathVariable int battleId) {
         int elixir = battleField.getCurrentElixir();
         int troops = battleField.getAliveTroopsCount();
         int leftHp = battleField.getLeftTowerHealth();
