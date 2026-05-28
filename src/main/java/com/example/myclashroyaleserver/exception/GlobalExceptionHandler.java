@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleGeneric(Exception e) {
+        e.printStackTrace();      // 打印完整堆栈到控制台
         Map<String, Object> error = new HashMap<>();
         error.put("code", 500);
         error.put("message", "Internal server error");
