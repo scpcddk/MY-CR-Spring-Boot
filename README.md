@@ -96,6 +96,7 @@ my-clash-royale-server/
 │   │               │   └── GlobalExceptionHandler.java      # @RestControllerAdvice，统一错误响应格式（400/500）
 │   │               │
 │   │               ├── controller/                          # 🌐 REST API 控制器
+|   |               |   ├── AiTestController.java            # 测试Api调用
 │   │               │   ├── BattleController.java            # 处理 /api/battles/{id} 与 /api/battles/{id}/cards
 │   │               │   ├── BattleStatusResponse.java        # 战场状态响应 DTO（圣水、存活单位数、塔血量）
 │   │               │   ├── DeployRequest.java               # 卡牌部署请求 DTO（cardType, elixirCost, x, y）
