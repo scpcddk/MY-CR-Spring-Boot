@@ -11,6 +11,8 @@ public class AiService {
     private OpenAiChatModel chatModel;
 
     public String chat(String userMessage) {
+        String key = System.getenv("DEEPSEEK_API_KEY");
+        System.out.println("API Key prefix: " + (key == null ? "null" : key.substring(0, Math.min(10, key.length()))));
         return chatModel.call(userMessage);
     }
 }

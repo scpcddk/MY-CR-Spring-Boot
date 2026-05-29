@@ -3,8 +3,8 @@ spring:
     name: my-clash-royale-server
   ai:
     openai:
-      api-key: ${DEEPSEEK_API_KEY:DEEPSEEK_API_KEY}
-      base-url: https://api.deepseek.com/v1
+      api-key: ${DEEPSEEK_API_KEY}
+      base-url: https://api.deepseek.com
       chat:
         options:
           model: deepseek-chat
