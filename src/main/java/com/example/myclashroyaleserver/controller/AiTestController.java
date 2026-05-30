@@ -18,4 +18,9 @@ public class AiTestController {
     public String chat(@RequestParam String msg) {
         return aiService.chat(msg);
     }
+
+    @GetMapping("/decide")
+    public AiService.AiAction decide(@RequestParam String state) {
+        return aiService.decideAction(state);
+    }
 }
