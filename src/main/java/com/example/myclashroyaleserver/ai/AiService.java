@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.swing.*;
-
 @Service
 public class AiService {
 
@@ -62,6 +60,7 @@ public class AiService {
                 return new AiAction(ActionType.WAIT);
             }
         } catch (Exception e) {
+            System.out.println("解析失败，原始响应: " + response);
             return new AiAction(ActionType.WAIT);
         }
     }
