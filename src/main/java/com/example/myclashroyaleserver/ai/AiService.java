@@ -1,5 +1,7 @@
 package com.example.myclashroyaleserver.ai;
 
+import com.example.myclashroyaleserver.engine.BattleField;
+import com.example.myclashroyaleserver.player.Player;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,8 @@ public class AiService {
 
     @Autowired
     private OpenAiChatModel chatModel;
+    @Autowired
+    private BattlefieldStateBuilder stateBuilder;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -19,6 +23,11 @@ public class AiService {
         String prompt = buildDecisionPrompt(battlefieldState);
         String response = chatModel.call(prompt);
         return parseAction(response);
+    }
+
+    public AiAction decideAction(BattleField battleField, Player currentPlayer) {
+        String state = stateBuilder.buildState(battleField, currentPlayer);
+        return decideAction(state);  // 调用上面的方法
     }
     public String chat(String userMessage) {
         return chatModel.call(userMessage);

@@ -1,5 +1,6 @@
 package com.example.myclashroyaleserver.engine;
 
+import com.example.myclashroyaleserver.player.Player;
 import org.springframework.stereotype.Component;
 import com.example.myclashroyaleserver.constant.EntityState;
 import com.example.myclashroyaleserver.constant.Team;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class BattleField {
@@ -24,6 +26,10 @@ public class BattleField {
     // 💧 蓝方和红方的圣水管理器
     private final ElixirManager blueElixir = new ElixirManager();
     private final ElixirManager redElixir = new ElixirManager();
+
+    // 红蓝双方玩家
+    private Player bluePlayer;
+    private Player redPlayer;
 
     //动态出生：将卡牌放入战场
     public void addEntity(GameEntity entity) {
@@ -174,7 +180,14 @@ public class BattleField {
         cardRegistry.put("弓箭手卡牌", UnitFactory::createArcher);
         // 未来加新卡，只需在这里加一行
     }
+    // 获取指定阵营的所有实体
+    public List<GameEntity> getEntitiesByTeam(Team team) {
+        return entities.stream().filter(e -> e.getTeam() == team).collect(Collectors.toList());
+    }
 
+    public Player getPlayerByTeam(Team team) {
+        return team == Team.BLUE ? bluePlayer : redPlayer;
+    }
     public int getCurrentElixir() {
         return 5;
     }

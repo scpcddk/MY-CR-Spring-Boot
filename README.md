@@ -107,6 +107,7 @@ my-clash-royale-server/
 │   │               │
 │   │               ├── ai/                                  # 🤖 AI 模块（计划 W6~W8）
 │   │               │   ├── AiService.java                   # 调用大模型 API（DeepSeek/OpenAI），使用 RestTemplate
+|   |               |   ├── BattlefieldStateBuilder.java     # 战场状态构建器 
 │   │               │   ├── AiDecisionQueue.java             # 异步决策队列：生产者（定时提交战场上下文）消费者（主线程）
 │   │               │   └── CardCounterConfig.java           # 卡牌克制关系：HashMap 本地缓存，查询 O(1)
 │   │               │

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 public class Deck {
     private final List<Card> hand = new ArrayList<>();      // 4张手牌
@@ -39,5 +40,15 @@ public class Deck {
         }
         Card next = deckPool.peek();
         System.out.printf(" | 🔮 下一张预测: [%s]\n", next != null ? next.getCardName() : "空");
+    }
+
+    public List<Card> getHand() {
+        return new ArrayList<>(hand);
+    }
+    public String getHandDescription() {
+        if (hand.isEmpty()) return "手牌为空";
+        return hand.stream()
+                .map(card -> card.getCardName() + "(" + card.getElixirCost() + "费)")
+                .collect(Collectors.joining(", "));
     }
 }
