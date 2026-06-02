@@ -6,10 +6,7 @@ import com.example.myclashroyaleserver.constant.Team;
 import com.example.myclashroyaleserver.engine.BattleField;
 import com.example.myclashroyaleserver.player.Player;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/ai")
@@ -39,5 +36,10 @@ public class AiTestController {
         Player player = bf.getPlayerByTeam(Team.RED);  // 需要先设置玩家
         if (player == null) return "No AI player";
         return stateBuilder.buildState(bf, player);
+    }
+
+    @PostMapping("/decide")
+    public AiService.AiAction decidePost(@RequestBody String state) {
+        return aiService.decideAction(state);
     }
 }

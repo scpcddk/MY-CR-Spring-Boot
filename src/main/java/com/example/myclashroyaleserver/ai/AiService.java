@@ -35,17 +35,27 @@ public class AiService {
 
     private String buildDecisionPrompt(String state) {
         return """
-                你是一个《皇室战争》AI 玩家。根据当前战场状态，决定下一步动作。
-                战场状态如下：
-                """ + state + """
-                
-                请严格按照以下 JSON 格式返回，不要包含任何额外解释或文字：
-                - 如果要部署卡牌，返回 {"action": "deploy", "cardIndex": 0, "x": 10.0, "y": 5.0}
-                - 如果等待（不出牌），返回 {"action": "wait"}
-                
-                注意：cardIndex 从 0 开始，x 和 y 为浮点数（范围 0-20）。
-                只返回 JSON，不要有其他内容。
-                """;
+            你是一个《皇室战争》AI 玩家。根据当前战场状态，决定下一步动作。
+            战场状态如下：
+            """ + state + """
+            
+            请**严格**按照以下 JSON 格式返回，**不要包含任何解释、标记或额外文字**：
+            - 如果要部署卡牌，返回 {"action": "deploy", "cardIndex": 0, "x": 10.0, "y": 5.0}
+            - 如果等待（不出牌），返回 {"action": "wait"}
+            
+            注意：
+            - cardIndex 从 0 开始，代表手牌索引。
+            - x 和 y 为浮点数，范围 0-20。
+            - **只返回 JSON，不要有其他内容。**
+            
+            正确示例：
+            {"action": "deploy", "cardIndex": 1, "x": 12.5, "y": 8.0}
+            {"action": "wait"}
+            
+            错误示例（不要这样返回）：
+            我认为应该出牌：{"action": "deploy"}   ← 错误
+            ```json {"action": "wait"} ```        ← 错误
+            """;
     }
 
     private AiAction parseAction(String response) {
@@ -72,6 +82,23 @@ public class AiService {
             System.out.println("解析失败，原始响应: " + response);
             return new AiAction(ActionType.WAIT);
         }
+    }
+
+    //调用重试机制（提高稳定性）
+    public AiAction decideActionWithRetry(String battlefieldState, int maxRetries) {
+        for(int i = 0; i < maxRetries; i++) {
+            try {
+                String prompt = buildDecisionPrompt(battlefieldState);
+                String response = chatModel.call(prompt);
+                AiAction action = parseAction(response);
+                if(action.getType() != ActionType.WAIT || i == maxRetries - 1) {
+                    return action;
+                }
+            } catch (Exception e) {
+                System.err.println("第 " + (i+1) + " 次调用失败: " + e.getMessage());
+            }
+        }
+        return new AiAction(ActionType.WAIT);
     }
 
     // 内部类定义动作
