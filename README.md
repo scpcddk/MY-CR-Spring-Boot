@@ -149,27 +149,29 @@ my-clash-royale-server/
 | **容器化 + AI 集成** | W6~W8 | ⏳ 待开始 |
 | **高并发 + AIOps** | W9~W12 | ⏳ 待开始 |
 
-### ✅ 本周（W5）已实现
-- [x] Spring Boot 3.3.5 项目创建，Maven 依赖管理
-- [x] 核心战斗组件注册为 `@Component`
-- [x] `application.yml` 配置（端口 8080）
-- [x] `GET /api/battle/status` 返回战场 JSON
-- [x] `POST /api/battle/deploy` 接收卡牌部署请求（临时实现）
+### ✅ 本周（W5～W6）已实现
+- [√] Spring Boot 3.3.5 项目创建，Maven 依赖管理
+- [√] 核心战斗组件注册为 `@Component`
+- [√] `application.yml` 配置（端口 8080）
+- [√] `GET /api/battles/1` 返回战场 JSON
+- [√] `POST /api/battles/1/cards` 接收卡牌部署请求
+- [√] 编写 Dockerfile，构建镜像并在容器中运行基础接口（`/api/battles/1` 正常）
 
-### 🚧 正在推进
-- D32 完善 `deployUnit` 与真实圣水扣减逻辑
-- D33 Docker 基础学习
+### 🚧 当前卡点（D46）
+**容器内 AI 接口调用失败**（本地 IDE 运行正常，Docker 内返回 500 / Empty reply）
+- **现象**：`/api/ai/chat?msg=hello` 在容器内返回 `Empty reply from server` 或 500，无有效日志
+- **已尝试**：
+    - 升级 Spring AI 版本（1.0.0-M3 → 1.0.0-M6 → 1.1.0）
+    - 修改 `base-url` 为 `https://api.deepseek.com/v1`
+    - 环境变量 `DEEPSEEK_API_KEY` 已正确传入容器
+    - 全局异常处理器已添加 `e.printStackTrace()`
+    - 在 Controller 和 Service 层添加 try-catch 打印
+    - 手动 `curl` 调用 DeepSeek API 在容器内成功，但 Spring AI 请求始终失败
+- **根本原因推测**：Spring AI 与 DeepSeek API 的认证头或请求格式存在不兼容
+- **当前尝试**：改用原生 `RestTemplate` 手动实现 API 调用，绕过 Spring AI
 
----
+### 下一步计划
+- 继续调试手动 `RestTemplate` 版本，解决容器内网络/认证问题
+- 若仍失败，考虑降级方案：在容器外（宿主机）运行 AI 代理服务，通过 HTTP 与游戏容器通信
 
-## 🧪 快速运行（当前版本）
-
-### 前置条件
-- JDK 21（项目已配置 `java.version=21`）
-- Maven 3.6+（或使用 `mvnw`）
-
-### 运行步骤
-```bash
-git clone https://github.com/scpcddk/MY-CR-Spring-Boot.git
-cd MY-CR-Spring-Boot
-./mvnw spring-boot:run
+> 说明：D46 目标是容器化 AI 网关连通性，目前正在攻坚中。基础游戏接口（出兵、战场状态）已完全容器化并正常工作。

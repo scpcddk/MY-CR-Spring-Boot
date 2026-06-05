@@ -1,36 +1,57 @@
 package com.example.myclashroyaleserver.ai;
 
-import com.example.myclashroyaleserver.engine.BattleField;
-import com.example.myclashroyaleserver.player.Player;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AiService {
 
-    @Autowired
-    private OpenAiChatModel chatModel;
-    @Autowired
-    private BattlefieldStateBuilder stateBuilder;
-
+    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // AI 决策方法
-    public AiAction decideAction(String battlefieldState) {
-        String prompt = buildDecisionPrompt(battlefieldState);
-        String response = chatModel.call(prompt);
-        return parseAction(response);
+    @Value("${deepseek.api-key}")
+    private String apiKey;
+
+    private final String DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
+
+    // 普通对话（用于 /api/ai/chat）
+    public String chat(String userMessage) {
+        try {
+            System.out.println("收到请求: " + userMessage);
+            Map<String, Object> requestBody = Map.of(
+                    "model", "deepseek-chat",
+                    "messages", List.of(Map.of("role", "user", "content", userMessage)),
+                    "temperature", 0.7
+            );
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+            System.out.println("发送请求到: " + DEEPSEEK_URL);
+            ResponseEntity<Map> response = restTemplate.postForEntity(DEEPSEEK_URL, entity, Map.class);
+            System.out.println("收到响应状态: " + response.getStatusCode());
+            Map<String, Object> body = response.getBody();
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
+            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+            return (String) message.get("content");
+        } catch (Exception e) {
+            e.printStackTrace(); // 强制打印
+            throw new RuntimeException("DeepSeek API 调用失败", e);
+        }
     }
 
-    public AiAction decideAction(BattleField battleField, Player currentPlayer) {
-        String state = stateBuilder.buildState(battleField, currentPlayer);
-        return decideAction(state);  // 调用上面的方法
-    }
-    public String chat(String userMessage) {
-        return chatModel.call(userMessage);
+    // 决策方法（用于 AI 自动出牌）
+    public AiAction decideAction(String battlefieldState) {
+        String prompt = buildDecisionPrompt(battlefieldState);
+        String response = chat(prompt);  // 复用 chat 方法
+        return parseAction(response);
     }
 
     private String buildDecisionPrompt(String state) {
@@ -39,66 +60,31 @@ public class AiService {
             战场状态如下：
             """ + state + """
             
-            请**严格**按照以下 JSON 格式返回，**不要包含任何解释、标记或额外文字**：
-            - 如果要部署卡牌，返回 {"action": "deploy", "cardIndex": 0, "x": 10.0, "y": 5.0}
-            - 如果等待（不出牌），返回 {"action": "wait"}
-            
-            注意：
-            - cardIndex 从 0 开始，代表手牌索引。
-            - x 和 y 为浮点数，范围 0-20。
-            - **只返回 JSON，不要有其他内容。**
-            
-            正确示例：
-            {"action": "deploy", "cardIndex": 1, "x": 12.5, "y": 8.0}
-            {"action": "wait"}
-            
-            错误示例（不要这样返回）：
-            我认为应该出牌：{"action": "deploy"}   ← 错误
-            ```json {"action": "wait"} ```        ← 错误
+            请严格返回 JSON 格式，不要包含额外文字：
+            {"action": "deploy", "cardIndex": 0, "x": 10.0, "y": 5.0}
+            或 {"action": "wait"}
             """;
     }
 
     private AiAction parseAction(String response) {
         try {
-            // 清理可能的 markdown 代码块标记
             String cleaned = response.trim();
-            if(cleaned.startsWith("```json")) {
-                cleaned = cleaned.substring(7);
-            }
-            if(cleaned.endsWith("```")) {
-                cleaned = cleaned.substring(0, cleaned.length() - 3);
-            }
+            if (cleaned.startsWith("```json")) cleaned = cleaned.substring(7);
+            if (cleaned.endsWith("```")) cleaned = cleaned.substring(0, cleaned.length() - 3);
             JsonNode node = objectMapper.readTree(cleaned);
             String action = node.get("action").asText();
-            if("deploy".equals(action)) {
+            if ("deploy".equals(action)) {
                 int cardIndex = node.get("cardIndex").asInt();
                 double x = node.get("x").asDouble();
                 double y = node.get("y").asDouble();
-                return new AiAction(ActionType.DEPLOY,cardIndex,x,y);
+                return new AiAction(ActionType.DEPLOY, cardIndex, x, y);
             } else {
                 return new AiAction(ActionType.WAIT);
             }
         } catch (Exception e) {
-            System.out.println("解析失败，原始响应: " + response);
+            System.err.println("解析失败，原始响应: " + response);
             return new AiAction(ActionType.WAIT);
         }
-    }
-
-    //调用重试机制（提高稳定性）
-    public AiAction decideActionWithRetry(String battlefieldState, int maxRetries) {
-        for(int i = 0; i < maxRetries; i++) {
-            try {
-                String prompt = buildDecisionPrompt(battlefieldState);
-                String response = chatModel.call(prompt);
-                AiAction action = parseAction(response);
-                if(action.getType() != ActionType.WAIT || i == maxRetries - 1) {
-                    return action;
-                }
-            } catch (Exception e) {
-                System.err.println("第 " + (i+1) + " 次调用失败: " + e.getMessage());
-            }
-        }
-        return new AiAction(ActionType.WAIT);
     }
 
     // 内部类定义动作
@@ -119,7 +105,6 @@ public class AiService {
             this.y = y;
         }
 
-        // getters...
         public ActionType getType() { return type; }
         public Integer getCardIndex() { return cardIndex; }
         public Double getX() { return x; }

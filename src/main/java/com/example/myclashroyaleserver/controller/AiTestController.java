@@ -21,7 +21,14 @@ public class AiTestController {
 
     @GetMapping("/chat")
     public String chat(@RequestParam String msg) {
-        return aiService.chat(msg);
+        try {
+            return aiService.chat(msg);
+        } catch (Exception e) {
+            // 打印完整堆栈到控制台（Docker logs）
+            e.printStackTrace();
+            // 返回详细错误信息（供调试）
+            return "Error: " + e.getClass().getSimpleName() + " - " + e.getMessage();
+        }
     }
 
     @GetMapping("/decide")
