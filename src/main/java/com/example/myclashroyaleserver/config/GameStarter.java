@@ -4,10 +4,11 @@ import com.example.myclashroyaleserver.engine.GameLoop;
 import org.springframework.stereotype.Component;
 import org.springframework.boot.CommandLineRunner;
 
-public class GameStater implements CommandLineRunner {
+@Component
+public class GameStarter implements CommandLineRunner {
     private final GameLoop gameLoop;
 
-    public GameStater(GameLoop gameLoop) {
+    public GameStarter(GameLoop gameLoop) {
         this.gameLoop = gameLoop;
     }
 
